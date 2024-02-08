@@ -1,17 +1,17 @@
-import { Component, useEffect } from 'react';
+import { useEffect } from 'react';
 
 export const Modal = ({ closeModal, image }) => {
   useEffect(() => {
+    const handlePressESC = e => {
+      if (e.code === 'Escape') closeModal();
+    };
+
     window.addEventListener('keydown', handlePressESC);
 
     return () => {
       window.removeEventListener('keydown', handlePressESC);
     };
-  }, []);
-
-  const handlePressESC = e => {
-    if (e.code === 'Escape') closeModal();
-  };
+  }, [handlePressESC]);
 
   const handleClose = e => {
     if (e.target === e.currentTarget) closeModal();
