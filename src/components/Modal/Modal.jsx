@@ -11,11 +11,11 @@ export const Modal = ({ closeModal, image }) => {
     return () => {
       window.removeEventListener('keydown', handlePressESC);
     };
-  }, [handlePressESC]);
+  }, [closeModal]);
 
-  const handleClose = e => {
+  function handleClose(e) {
     if (e.target === e.currentTarget) closeModal();
-  };
+  }
 
   return (
     <div onClick={handleClose} className="overlay">
