@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import './style.scss';
 
@@ -10,28 +10,23 @@ import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
 import { Modal } from './Modal/Modal';
 
-export default class App extends Component {
-  state = {
-    images: [],
-    isLoading: false,
-    error: '',
-    searchText: '',
-    page: 1,
-    modal: false,
-    modalImage: '',
-  };
+export const App = () => {
+  const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [searchText, setSearchText] = useState('');
+  const [page, setPage] = useState(1);
+  const [modal, setModal] = useState(false);
+  const [modalImage, setModalImage] = useState('');
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.searchText !== this.state.searchText) {
-      this.setState({ images: [], page: 1 });
-      this.getImages(this.state.searchText, '1');
-    }
-    if (prevState.page < this.state.page) {
-      this.getImages(this.state.searchText, `${this.state.page}`);
-    }
-  }
-  getImages = (query, page) => {
-    this.setState({ isLoading: true });
+  useEffect(() => {
+    if (!searchText) return;
+
+    getImages(searchText, `${page}`);
+  }, [searchText, page]);
+
+  const getImages = (query, page) => {
+    setIsLoading(true);
     API.getImages(query, page)
       .then(responce => {
         if (responce.ok) {
@@ -48,64 +43,47 @@ export default class App extends Component {
             largeImageURL,
           })
         );
-        this.setState(prev => ({
-          images: [...prev.images, ...newImages],
-          isLoading: false,
-          error: '',
-        }));
+        setImages(prevImages => [...prevImages, ...newImages]);
+        setIsLoading(false);
+        setError('');
       })
       .catch(error => {
         console.log(error.message);
-        this.setState({
-          error: error.message,
-        });
+        setError(error.message);
       });
   };
 
-  handleSearch = value => {
-    this.setState({
-      searchText: value,
-    });
+  const handleSearch = value => {
+    if (searchText !== value) {
+      setSearchText(value);
+      setPage(1);
+      setImages([]);
+    }
   };
-  addImages = () => {
-    this.setState(prev => ({
-      page: prev.page + 1,
-    }));
-  };
-
-  openModal = srcImage => {
-    this.setState({
-      modal: true,
-      modalImage: srcImage,
-    });
-  };
-  closeModal = () => {
-    this.setState({
-      modal: false,
-    });
+  const addImages = () => {
+    setPage(prev => prev + 1);
   };
 
-  render() {
-    return (
-      <>
-        <div className="app">
-          <Searchbar onSubmit={this.handleSearch} />
-          {this.state.error && <p>{this.state.error}</p>}
-          {Boolean(this.state.images.length) && (
-            <ImageGallery
-              images={this.state.images}
-              openModal={this.openModal}
-            />
-          )}
-          {this.state.isLoading && !this.state.error && <Loader />}
-          {Boolean(this.state.images.length) && !this.state.isLoading && (
-            <Button onClick={this.addImages} />
-          )}
-        </div>
-        {this.state.modal && (
-          <Modal image={this.state.modalImage} closeModal={this.closeModal} />
+  const openModal = srcImage => {
+    setModal(true);
+    setModalImage(srcImage);
+  };
+  const closeModal = () => {
+    setModal(false);
+  };
+
+  return (
+    <>
+      <div className="app">
+        <Searchbar onSubmit={handleSearch} />
+        {error && <p>{error}</p>}
+        {Boolean(images.length) && (
+          <ImageGallery images={images} openModal={openModal} />
         )}
-      </>
-    );
-  }
-}
+        {isLoading && !error && <Loader />}
+        {Boolean(images.length) && !isLoading && <Button onClick={addImages} />}
+      </div>
+      {modal && <Modal image={modalImage} closeModal={closeModal} />}
+    </>
+  );
+};

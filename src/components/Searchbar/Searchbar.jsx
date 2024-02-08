@@ -1,41 +1,35 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
 
-export class Searchbar extends Component {
-  state = {
-    value: '',
-  };
+export const Searchbar = ({ onSubmit }) => {
+  const [value, setValue] = useState('');
 
-  handleChange = e => {
-    this.setState({
-      value: e.target.value,
-    });
+  const handleChange = e => {
+    setValue(e.target.value);
   };
-  handleSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
-    this.props.onSubmit(this.state.value);
+    onSubmit(value);
   };
 
-  render() {
-    return (
-      <header className="search-bar">
-        <form className="search-form" onSubmit={this.handleSubmit}>
-          <button type="submit" className=" search-form-button">
-            <FaSearch />
-            <span className="search-form-button-label">Search</span>
-          </button>
+  return (
+    <header className="search-bar">
+      <form className="search-form" onSubmit={handleSubmit}>
+        <button type="submit" className=" search-form-button">
+          <FaSearch />
+          <span className="search-form-button-label">Search</span>
+        </button>
 
-          <input
-            onChange={this.handleChange}
-            className="input search-form-input"
-            type="text"
-            autoComplete="off"
-            autoFocus
-            placeholder="Search images and photos"
-            value={this.state.value}
-          />
-        </form>
-      </header>
-    );
-  }
-}
+        <input
+          onChange={handleChange}
+          className="input search-form-input"
+          type="text"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+          value={value}
+        />
+      </form>
+    </header>
+  );
+};
